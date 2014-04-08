@@ -279,6 +279,7 @@ gtk_public_h_sources = 		\
 	gtkgesturedrag.h	\
 	gtkgesturelongpress.h	\
 	gtkgesturemultipress.h	\
+	gtkgesturepan.h		\
 	gtkgesturerotate.h	\
 	gtkgesturesingle.h	\
 	gtkgestureswipe.h	\
@@ -775,6 +776,7 @@ gtk_base_c_sources = 		\
 	gtkgesturedrag.c	\
 	gtkgesturelongpress.c	\
 	gtkgesturemultipress.c	\
+	gtkgesturepan.c		\
 	gtkgesturerotate.c	\
 	gtkgesturesingle.c	\
 	gtkgestureswipe.c	\
