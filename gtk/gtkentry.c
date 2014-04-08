@@ -4294,6 +4294,9 @@ gtk_entry_button_press (GtkWidget      *widget,
       is_touchscreen = test_touchscreen ||
         gdk_device_get_source (source) == GDK_SOURCE_TOUCHSCREEN;
 
+      if (is_touchscreen)
+        gtk_entry_ensure_text_handles (entry);
+
       priv->select_words = FALSE;
       priv->select_lines = FALSE;
 
@@ -4373,12 +4376,8 @@ gtk_entry_button_press (GtkWidget      *widget,
 	  else
             {
               gtk_editable_set_position (editable, tmp_pos);
-
               if (is_touchscreen)
-                {
-                  gtk_entry_ensure_text_handles (entry);
-                  gtk_entry_update_handles (entry, GTK_TEXT_HANDLE_MODE_CURSOR);
-                }
+                gtk_entry_update_handles (entry, GTK_TEXT_HANDLE_MODE_NONE);
             }
 	  break;
  
@@ -4490,6 +4489,7 @@ gtk_entry_button_release (GtkWidget      *widget,
     }
   else if (is_touchscreen)
     {
+      gtk_entry_update_handles (entry, GTK_TEXT_HANDLE_MODE_CURSOR);
       gtk_entry_selection_bubble_popup_set (entry);
       if (priv->magnifier_popover)
         gtk_widget_hide (priv->magnifier_popover);
