@@ -439,7 +439,6 @@ struct _GtkTreeViewPrivate
 
   /* Gestures */
   GtkGesture *multipress_gesture;
-  GtkGesture *drag_gesture;
 
   /* Tooltip support */
   gint tooltip_column;
