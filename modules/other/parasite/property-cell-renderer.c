@@ -33,6 +33,7 @@ typedef struct
 {
   GObject *object;
   char *name;
+  gboolean is_child_property;
 
 } ParasitePropertyCellRendererPrivate;
 
@@ -61,7 +62,8 @@ enum
 {
   PROP_0,
   PROP_OBJECT,
-  PROP_NAME
+  PROP_NAME,
+  PROP_IS_CHILD_PROPERTY
 };
 
 
@@ -92,6 +94,10 @@ parasite_property_cell_renderer_class_init (ParasitePropertyCellRendererClass *k
       g_param_spec_string ("name", "Name", "The property name",
                            NULL, G_PARAM_READWRITE));
 
+  g_object_class_install_property (object_class, PROP_IS_CHILD_PROPERTY,
+      g_param_spec_boolean ("is-child-property", "Child property", "Child property",
+                            FALSE, G_PARAM_READWRITE));
+
   g_type_class_add_private (object_class, sizeof (ParasitePropertyCellRendererPrivate));
 }
 
@@ -112,6 +118,10 @@ parasite_property_cell_renderer_get_property (GObject    *object,
 
     case PROP_NAME:
       g_value_set_string (value, priv->name);
+      break;
+
+    case PROP_IS_CHILD_PROPERTY:
+      g_value_set_boolean (value, priv->is_child_property);
       break;
 
     default:
@@ -142,10 +152,77 @@ parasite_property_cell_renderer_set_property (GObject      *object,
       g_object_notify (object, "name");
       break;
 
+    case PROP_IS_CHILD_PROPERTY:
+      priv->is_child_property = g_value_get_boolean (value);
+      g_object_notify (object, "is-child-property");
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
       break;
     }
+}
+
+static GParamSpec *
+find_prop (GtkCellRenderer *renderer)
+{
+  ParasitePropertyCellRendererPrivate *priv =
+    PARASITE_PROPERTY_CELL_RENDERER_GET_PRIVATE (renderer);
+
+  if (priv->is_child_property)
+    {
+      GtkWidget *widget;
+      GtkWidget *parent;
+
+      widget = GTK_WIDGET (priv->object);
+      parent = gtk_widget_get_parent (widget);
+
+      return gtk_container_class_find_child_property (G_OBJECT_GET_CLASS (parent), priv->name);
+    }
+
+  return g_object_class_find_property (G_OBJECT_GET_CLASS (priv->object), priv->name);
+}
+
+static void
+get_value (GtkCellRenderer *renderer,
+           GValue          *gvalue)
+{
+  ParasitePropertyCellRendererPrivate *priv =
+    PARASITE_PROPERTY_CELL_RENDERER_GET_PRIVATE (renderer);
+
+  if (priv->is_child_property)
+    {
+      GtkWidget *widget;
+      GtkWidget *parent;
+
+      widget = GTK_WIDGET (priv->object);
+      parent = gtk_widget_get_parent (widget);
+
+      gtk_container_child_get_property (GTK_CONTAINER (parent), widget, priv->name, gvalue);
+    }
+  else
+    g_object_get_property (priv->object, priv->name, gvalue);
+}
+
+static void
+set_value (GtkCellRenderer *renderer,
+           GValue          *gvalue)
+{
+  ParasitePropertyCellRendererPrivate *priv =
+    PARASITE_PROPERTY_CELL_RENDERER_GET_PRIVATE (renderer);
+
+  if (priv->is_child_property)
+    {
+      GtkWidget *widget;
+      GtkWidget *parent;
+
+      widget = GTK_WIDGET (priv->object);
+      parent = gtk_widget_get_parent (widget);
+
+      gtk_container_child_set_property (GTK_CONTAINER (parent), widget, priv->name, gvalue);
+    }
+  else
+    g_object_set_property (priv->object, priv->name, gvalue);
 }
 
 static GtkCellEditable *
@@ -159,20 +236,17 @@ parasite_property_cell_renderer_start_editing (GtkCellRenderer      *renderer,
 {
   PangoFontDescription *font_desc;
   GtkCellEditable *editable = NULL;
-  GObject *object;
-  const char *name;
   GValue gvalue = { 0 };
   GParamSpec *prop;
 
-  g_object_get (renderer, "object", &object, "name", &name, NULL);
-
-  prop = g_object_class_find_property (G_OBJECT_GET_CLASS (object), name);
+  prop = find_prop (renderer);
 
   if (!(prop->flags & G_PARAM_WRITABLE))
     return NULL;
 
   g_value_init (&gvalue, prop->value_type);
-  g_object_get_property (object, name, &gvalue);
+
+  get_value (renderer, &gvalue);
 
   if (G_VALUE_HOLDS_ENUM (&gvalue) || G_VALUE_HOLDS_BOOLEAN (&gvalue))
     {
@@ -308,9 +382,6 @@ parasite_property_cell_renderer_start_editing (GtkCellRenderer      *renderer,
                     G_CALLBACK (parasite_property_cell_renderer_stop_editing),
                     renderer);
 
-  g_object_set_data_full (G_OBJECT (editable), "_prop_name", g_strdup (name), g_free);
-  g_object_set_data (G_OBJECT (editable), "_prop_object", object);
-
   return editable;
 }
 
@@ -318,15 +389,11 @@ static void
 parasite_property_cell_renderer_stop_editing (GtkCellEditable *editable,
                                               GtkCellRenderer *renderer)
 {
-  GObject *object;
-  const gchar *name;
   GValue gvalue = { 0 };
   GParamSpec *prop;
 
-  object = g_object_get_data (G_OBJECT (editable), "_prop_object");
-  name = g_object_get_data (G_OBJECT (editable), "_prop_name");
+  prop = find_prop (renderer);
 
-  prop = g_object_class_find_property (G_OBJECT_GET_CLASS (object), name);
   g_value_init (&gvalue, prop->value_type);
 
   if (GTK_IS_ENTRY (editable))
@@ -388,7 +455,7 @@ parasite_property_cell_renderer_stop_editing (GtkCellEditable *editable,
         }
     }
 
-  g_object_set_property (object, name, &gvalue);
+  set_value (renderer, &gvalue);
   g_value_unset (&gvalue);
 }
 

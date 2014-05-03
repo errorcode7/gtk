@@ -55,9 +55,9 @@ typedef struct _ParasitePropListClass
 G_BEGIN_DECLS
 
 GType      parasite_proplist_get_type   (void);
-GtkWidget *parasite_proplist_new        (void);
+GtkWidget *parasite_proplist_new        (gboolean child_props);
 void       parasite_proplist_set_widget (ParasitePropList *proplist,
-				                         GtkWidget        *widget);
+                                         GtkWidget        *widget);
 
 
 G_END_DECLS

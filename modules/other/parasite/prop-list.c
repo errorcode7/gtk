@@ -33,6 +33,11 @@ enum
   NUM_COLUMNS
 };
 
+enum
+{
+  PROP_ZERO,
+  PROP_CHILD_PROPS
+};
 
 struct _ParasitePropListPrivate
 {
@@ -40,6 +45,9 @@ struct _ParasitePropListPrivate
   GtkListStore *model;
   GHashTable *prop_iters;
   GList *signal_cnxs;
+  gboolean child_props;
+  GtkTreeViewColumn *name_col;
+  GtkTreeViewColumn *value_col;
 };
 
 #define PARASITE_PROPLIST_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE((obj), PARASITE_TYPE_PROPLIST, ParasitePropListPrivate))
@@ -73,6 +81,7 @@ parasite_proplist_init (ParasitePropList      *proplist,
   gtk_tree_view_column_set_resizable (column, TRUE);
   gtk_tree_view_column_set_sort_order (column, GTK_SORT_ASCENDING);
   gtk_tree_view_column_set_sort_column_id (column, COLUMN_NAME);
+  proplist->priv->name_col = column;
 
   renderer = parasite_property_cell_renderer_new ();
   g_object_set (G_OBJECT (renderer), "scale", TREE_TEXT_SCALE, NULL);
@@ -84,10 +93,69 @@ parasite_proplist_init (ParasitePropList      *proplist,
                                                      NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (proplist), column);
   gtk_tree_view_column_set_resizable (column, TRUE);
+  proplist->priv->value_col = column;
 
   gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (proplist->priv->model),
                                         COLUMN_NAME,
                                         GTK_SORT_ASCENDING);
+}
+
+static void
+parasite_proplist_set_child_props (ParasitePropList *proplist,
+                                   gboolean          child_props)
+{
+  GList *cells;
+
+  proplist->priv->child_props = child_props;
+
+  if (child_props)
+    gtk_tree_view_column_set_title (proplist->priv->name_col, "Child Property");
+  else
+    gtk_tree_view_column_set_title (proplist->priv->name_col, "Property");
+
+  cells = gtk_cell_layout_get_cells (GTK_CELL_LAYOUT (proplist->priv->value_col));
+  g_object_set (cells->data, "is-child-property", child_props, NULL);
+  g_list_free (cells);
+}
+
+static void
+parasite_proplist_get_property (GObject    *object,
+                                guint       param_id,
+                                GValue     *value,
+                                GParamSpec *pspec)
+{
+  ParasitePropList *proplist = PARASITE_PROPLIST (object);
+
+  switch (param_id)
+    {
+    case PROP_CHILD_PROPS:
+      g_value_set_boolean (value, proplist->priv->child_props);
+      break;
+
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
+      break;
+    }
+}
+
+static void
+parasite_proplist_set_property (GObject      *object,
+                                guint         param_id,
+                                const GValue *value,
+                                GParamSpec   *pspec)
+{
+  ParasitePropList *proplist = PARASITE_PROPLIST (object);
+
+  switch (param_id)
+    {
+    case PROP_CHILD_PROPS:
+      parasite_proplist_set_child_props (proplist, g_value_get_boolean (value));
+      break;
+
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
+      break;
+    }
 }
 
 
@@ -97,6 +165,12 @@ parasite_proplist_class_init (ParasitePropListClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   parent_class = g_type_class_peek_parent (klass);
+  object_class->get_property = parasite_proplist_get_property;
+  object_class->set_property = parasite_proplist_set_property;
+
+  g_object_class_install_property (object_class, PROP_CHILD_PROPS,
+     g_param_spec_boolean ("child-properties", "Child properties", "Child properties",
+                           FALSE, G_PARAM_READWRITE));
 
   g_type_class_add_private (object_class, sizeof (ParasitePropListPrivate));
 }
@@ -110,8 +184,18 @@ parasite_prop_list_update_prop (ParasitePropList *proplist,
   gchar *value;
 
   g_value_init (&gvalue, prop->value_type);
-  g_object_get_property (G_OBJECT (proplist->priv->widget),
-                         prop->name, &gvalue);
+  if (proplist->priv->child_props)
+    {
+      GtkWidget *parent;
+
+      parent = gtk_widget_get_parent (proplist->priv->widget);
+      gtk_container_child_get_property (GTK_CONTAINER (parent),
+                                        proplist->priv->widget,
+                                        prop->name, &gvalue);
+    }
+  else
+    g_object_get_property (G_OBJECT (proplist->priv->widget),
+                           prop->name, &gvalue);
 
   if (G_VALUE_HOLDS_ENUM (&gvalue))
     {
@@ -176,9 +260,11 @@ parasite_proplist_get_type (void)
 
 
 GtkWidget *
-parasite_proplist_new (void)
+parasite_proplist_new (gboolean child_props)
 {
-  return GTK_WIDGET (g_object_new (PARASITE_TYPE_PROPLIST, NULL));
+  return GTK_WIDGET (g_object_new (PARASITE_TYPE_PROPLIST,
+                                   "child-properties", child_props,
+                                   NULL));
 }
 
 void
@@ -207,8 +293,20 @@ parasite_proplist_set_widget (ParasitePropList *proplist,
   g_hash_table_remove_all (proplist->priv->prop_iters);
   gtk_list_store_clear (proplist->priv->model);
 
-  props = g_object_class_list_properties (G_OBJECT_GET_CLASS (widget),
-                                          &num_properties);
+  if (proplist->priv->child_props)
+    {
+      GtkWidget *parent;
+
+      parent = gtk_widget_get_parent (widget);
+      if (!parent)
+        return;
+
+      props = gtk_container_class_list_child_properties (G_OBJECT_GET_CLASS (parent),
+                                                         &num_properties);
+    }
+  else
+    props = g_object_class_list_properties (G_OBJECT_GET_CLASS (widget),
+                                            &num_properties);
 
   for (i = 0; i < num_properties; i++)
     {
@@ -226,7 +324,10 @@ parasite_proplist_set_widget (ParasitePropList *proplist,
                            gtk_tree_iter_copy (&iter));
 
       /* Listen for updates */
-      signal_name = g_strdup_printf ("notify::%s", prop->name);
+      if (proplist->priv->child_props)
+        signal_name = g_strdup_printf ("child-notify::%s", prop->name);
+      else
+        signal_name = g_strdup_printf ("notify::%s", prop->name);
 
       handler = g_signal_connect (G_OBJECT (widget), signal_name,
                                   G_CALLBACK (parasite_proplist_prop_changed_cb),

@@ -33,8 +33,8 @@ on_widget_tree_selection_changed (ParasiteWidgetTree *widget_tree,
     parasite_widget_tree_get_selected_widget (widget_tree);
   if (selected != NULL)
     {
-      parasite_proplist_set_widget (PARASITE_PROPLIST (parasite->prop_list),
-                                    selected);
+      parasite_proplist_set_widget (PARASITE_PROPLIST (parasite->prop_list), selected);
+      parasite_proplist_set_widget (PARASITE_PROPLIST (parasite->child_prop_list), selected);
 
       /* Flash the widget. */
       gtkparasite_flash_widget (parasite, selected);
@@ -66,7 +66,10 @@ create_widget_list_pane (ParasiteWindow *parasite)
 static GtkWidget *
 create_prop_list_pane (ParasiteWindow *parasite)
 {
+  GtkWidget *paned;
   GtkWidget *swin;
+
+  paned = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
 
   swin = gtk_scrolled_window_new (NULL, NULL);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (swin),
@@ -74,12 +77,25 @@ create_prop_list_pane (ParasiteWindow *parasite)
   gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (swin),
                                        GTK_SHADOW_IN);
   gtk_widget_set_size_request (swin, 250, -1);
-
-  parasite->prop_list = parasite_proplist_new ();
+  parasite->prop_list = parasite_proplist_new (FALSE);
   gtk_widget_show (parasite->prop_list);
   gtk_container_add (GTK_CONTAINER (swin), parasite->prop_list);
+  gtk_widget_show (swin);
+  gtk_container_add (GTK_CONTAINER (paned), swin);
 
-  return swin;
+  swin = gtk_scrolled_window_new (NULL, NULL);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (swin),
+                                  GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+  gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (swin),
+                                       GTK_SHADOW_IN);
+  gtk_widget_set_size_request (swin, 250, -1);
+  parasite->child_prop_list = parasite_proplist_new (TRUE);
+  gtk_widget_show (parasite->child_prop_list);
+  gtk_container_add (GTK_CONTAINER (swin), parasite->child_prop_list);
+  gtk_widget_show (swin);
+  gtk_container_add (GTK_CONTAINER (paned), swin);
+
+  return paned;
 }
 
 static void
