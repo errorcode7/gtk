@@ -199,7 +199,7 @@ gtkparasite_window_create (void)
   g_free (title);
 
   group = gtk_window_group_new ();
-  gtk_window_group_add_window (group, window->window);
+  gtk_window_group_add_window (group, GTK_WINDOW (window->window));
 
   vpaned = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
   gtk_widget_show (vpaned);
