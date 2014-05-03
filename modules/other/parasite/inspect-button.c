@@ -263,29 +263,28 @@ property_query_event (GtkWidget *widget,
       on_highlight_widget (widget, event, data);
     }
 
-  return TRUE;
+  return FALSE;
 }
 
 static void
-on_inspect_button_release (GtkWidget      *button,
-                           GdkEventButton *event,
-                           ParasiteWindow *parasite)
+on_inspect (GtkWidget      *button,
+            ParasiteWindow *parasite)
 {
+  GdkDisplay *display;
+  GdkDevice *device;
   GdkCursor *cursor;
-  GdkEventMask events;
 
   g_signal_connect (button, "event",
                     G_CALLBACK (property_query_event), parasite);
 
-  events = GDK_BUTTON_PRESS_MASK
-           | GDK_BUTTON_RELEASE_MASK
-           | GDK_POINTER_MOTION_MASK;
-
-  cursor = gdk_cursor_new_for_display (gtk_widget_get_display (button), GDK_CROSSHAIR);
-  gdk_device_grab (event->device,
+  display = gtk_widget_get_display (button);
+  cursor = gdk_cursor_new_for_display (display, GDK_CROSSHAIR);
+  device = gdk_device_manager_get_client_pointer (gdk_display_get_device_manager (display));
+  gdk_device_grab (device,
                    gtk_widget_get_window (GTK_WIDGET (button)),
                    GDK_OWNERSHIP_NONE, TRUE,
-                   events, cursor, GDK_CURRENT_TIME);
+                   GDK_BUTTON_RELEASE_MASK,
+                   cursor, GDK_CURRENT_TIME);
   g_object_unref (cursor);
   gtk_grab_add (GTK_WIDGET (button));
 }
@@ -296,8 +295,7 @@ gtkparasite_inspect_button_new (ParasiteWindow *parasite)
   GtkWidget *button;
 
   button = gtk_button_new_with_label ("Inspect");
-  g_signal_connect (G_OBJECT (button), "button_release_event",
-                    G_CALLBACK (on_inspect_button_release), parasite);
+  g_signal_connect (G_OBJECT (button), "clicked", G_CALLBACK (on_inspect), parasite);
 
   return button;
 }
