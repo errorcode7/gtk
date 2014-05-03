@@ -39,16 +39,14 @@ typedef struct
   GtkWidget *action_list;
   GtkWidget *python_shell;
 
-  GtkWidget *grab_window;
-  GtkWidget *highlight_window;
-
   GtkWidget *widget_popup;
   GtkWidget *action_popup;
 
-  GdkWindow *selected_window;
+  GtkWidget *selected_widget;
 
   gboolean edit_mode_enabled;
 
+  GtkWidget *flash_widget;
   int flash_count;
   int flash_cnx;
 
