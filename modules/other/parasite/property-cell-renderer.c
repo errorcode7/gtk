@@ -299,7 +299,7 @@ parasite_property_cell_renderer_start_editing (GtkCellRenderer      *renderer,
 
   font_desc = pango_font_description_new ();
   pango_font_description_set_size (font_desc, 8 * PANGO_SCALE);
-  gtk_widget_modify_font (GTK_WIDGET (editable), font_desc);
+  gtk_widget_override_font (GTK_WIDGET (editable), font_desc);
   pango_font_description_free (font_desc);
 
   g_value_unset (&gvalue);

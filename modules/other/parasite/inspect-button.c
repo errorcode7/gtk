@@ -26,10 +26,10 @@
 
 static void
 on_inspect_widget (GtkWidget      *grab_window,
-		           GdkEventButton *event,
+                   GdkEventButton *event,
                    ParasiteWindow *parasite)
 {
-  gdk_pointer_ungrab (event->time);
+  gdk_device_ungrab (event->device, event->time);
   gtk_widget_hide (parasite->highlight_window);
 
   if (parasite->selected_window != NULL)
@@ -38,18 +38,18 @@ on_inspect_widget (GtkWidget      *grab_window,
       GtkWidget *widget = NULL;
 
       gdk_window_get_user_data (gdk_window_get_toplevel (parasite->selected_window),
-				                (gpointer *)&toplevel);
+                                (gpointer *)&toplevel);
 
       gdk_window_get_user_data (parasite->selected_window,
-				                (gpointer *)&widget);
+                                (gpointer *)&widget);
 
       if (toplevel)
-	    parasite_widget_tree_scan (PARASITE_WIDGET_TREE (parasite->widget_tree),
+        parasite_widget_tree_scan (PARASITE_WIDGET_TREE (parasite->widget_tree),
                                    toplevel);
 
       if (widget)
-	    parasite_widget_tree_select_widget (PARASITE_WIDGET_TREE (parasite->widget_tree),
-					                        widget);
+        parasite_widget_tree_select_widget (PARASITE_WIDGET_TREE (parasite->widget_tree),
+                                            widget);
     }
 }
 
@@ -57,41 +57,36 @@ static void
 on_highlight_window_show (GtkWidget      *window,
                           ParasiteWindow *parasite)
 {
-  if (gtk_widget_is_composited (parasite->window))
-    gtk_window_set_opacity (GTK_WINDOW (parasite->highlight_window), 0.2);
-  else
-    {
-      /*
-       * TODO: Do something different when there's no compositing manager.
-       *       Draw a border or something.
-       */
-    }
+  gtk_widget_set_opacity (parasite->highlight_window, 0.2);
 }
 
 static void
 ensure_highlight_window (ParasiteWindow *parasite)
 {
-  GdkColor color;
+  GdkRGBA color;
 
   if (parasite->highlight_window != NULL)
     return;
 
-  color.red = 0;
-  color.green = 0;
-  color.blue = 65535;
+  color.red = 0.0;
+  color.green = 0.0;
+  color.blue = 1.0;
+  color.alpha = 1.0;
 
   parasite->highlight_window = gtk_window_new (GTK_WINDOW_POPUP);
-  gtk_widget_modify_bg (parasite->highlight_window, GTK_STATE_NORMAL, &color);
+  gtk_widget_override_background_color (parasite->highlight_window, 0, &color);
 
   g_signal_connect (G_OBJECT (parasite->highlight_window), "show",
-		            G_CALLBACK (on_highlight_window_show), parasite);
+                    G_CALLBACK (on_highlight_window_show), parasite);
 }
 
 static void
 on_highlight_widget (GtkWidget      *grab_window,
-		             GdkEventMotion *event,
+                     GdkEventMotion *event,
                      ParasiteWindow *parasite)
 {
+  GdkDisplay *display;
+  GdkDevice *device;
   GdkWindow *selected_window;
   gint x, y, width, height;
 
@@ -99,9 +94,9 @@ on_highlight_widget (GtkWidget      *grab_window,
 
   gtk_widget_hide (parasite->highlight_window);
 
-  selected_window =
-    gdk_display_get_window_at_pointer (gtk_widget_get_display (grab_window),
-				                       NULL, NULL);
+  display = gtk_widget_get_display (grab_window);
+  device = gdk_device_manager_get_client_pointer (gdk_display_get_device_manager (display));
+  selected_window = gdk_device_get_window_at_position (device, NULL, NULL);
 
   if (selected_window == NULL)
     {
@@ -129,7 +124,7 @@ on_highlight_widget (GtkWidget      *grab_window,
 
 static void
 on_inspect_button_release (GtkWidget      *button,
-			               GdkEventButton *event,
+                           GdkEventButton *event,
                            ParasiteWindow *parasite)
 {
   GdkCursor *cursor;
@@ -148,15 +143,17 @@ on_inspect_button_release (GtkWidget      *button,
       gtk_widget_add_events (parasite->grab_window, events);
 
       g_signal_connect (G_OBJECT (parasite->grab_window), "button_release_event",
-			            G_CALLBACK (on_inspect_widget), parasite);
+                        G_CALLBACK (on_inspect_widget), parasite);
       g_signal_connect (G_OBJECT (parasite->grab_window), "motion_notify_event",
-			            G_CALLBACK (on_highlight_widget), parasite);
+                        G_CALLBACK (on_highlight_widget), parasite);
     }
 
   cursor = gdk_cursor_new_for_display (gtk_widget_get_display (button), GDK_CROSSHAIR);
-  gdk_pointer_grab (gtk_widget_get_window (parasite->grab_window), FALSE,
-		            events, NULL, cursor, event->time);
-  gdk_cursor_unref (cursor);
+  gdk_device_grab (event->device,
+                   gtk_widget_get_window (parasite->grab_window),
+                   GDK_OWNERSHIP_WINDOW, FALSE,
+                   events, cursor, event->time);
+  g_object_unref (cursor);
 }
 
 GtkWidget *
@@ -166,7 +163,7 @@ gtkparasite_inspect_button_new (ParasiteWindow *parasite)
 
   button = gtk_button_new_with_label ("Inspect");
   g_signal_connect (G_OBJECT (button), "button_release_event",
-		            G_CALLBACK (on_inspect_button_release), parasite);
+                    G_CALLBACK (on_inspect_button_release), parasite);
 
   return button;
 }
@@ -185,9 +182,9 @@ on_flash_timeout (ParasiteWindow *parasite)
   if (parasite->flash_count % 2 == 0)
     {
       if (gtk_widget_get_visible (parasite->highlight_window))
-	    gtk_widget_hide (parasite->highlight_window);
+        gtk_widget_hide (parasite->highlight_window);
       else
-	    gtk_widget_show (parasite->highlight_window);
+        gtk_widget_show (parasite->highlight_window);
     }
 
   return TRUE;
@@ -222,7 +219,7 @@ gtkparasite_flash_widget (ParasiteWindow *parasite,
       gtk_widget_show (parasite->highlight_window);
 
       if (parasite->flash_cnx != 0)
-	    g_source_remove (parasite->flash_cnx);
+        g_source_remove (parasite->flash_cnx);
 
       parasite->flash_count = 0;
       parasite->flash_cnx = g_timeout_add (150, (GSourceFunc) on_flash_timeout, parasite);

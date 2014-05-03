@@ -25,9 +25,6 @@
 #include "prop-list.h"
 #include "widget-tree.h"
 
-#include "config.h"
-
-
 static void
 on_widget_tree_selection_changed (ParasiteWidgetTree *widget_tree,
                                   ParasiteWindow     *parasite)
@@ -114,15 +111,13 @@ create_widget_tree (ParasiteWindow *parasite)
   GtkWidget *swin;
   GtkWidget *hpaned;
 
-  vbox = gtk_vbox_new (FALSE, 6);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
   gtk_widget_show (vbox);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 12);
 
-  bbox = gtk_hbutton_box_new ();
+  bbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
   gtk_widget_show (bbox);
   gtk_box_pack_start (GTK_BOX (vbox), bbox, FALSE, FALSE, 0);
-  gtk_button_box_set_layout (GTK_BUTTON_BOX (bbox), GTK_BUTTONBOX_START);
-  gtk_box_set_spacing (GTK_BOX (bbox), 6);
 
   button = gtkparasite_inspect_button_new (parasite);
   gtk_widget_show (button);
@@ -142,7 +137,7 @@ create_widget_tree (ParasiteWindow *parasite)
   g_signal_connect (G_OBJECT (button), "toggled",
                     G_CALLBACK (on_show_graphic_updates_toggled), parasite);
 
-  hpaned = gtk_hpaned_new ();
+  hpaned = gtk_paned_new (GTK_ORIENTATION_HORIZONTAL);
   gtk_widget_show (hpaned);
   gtk_box_pack_start (GTK_BOX (vbox), hpaned, TRUE, TRUE, 0);
 
@@ -163,7 +158,7 @@ create_action_list (ParasiteWindow *parasite)
   GtkWidget *vbox;
   GtkWidget *swin;
 
-  vbox = gtk_vbox_new (FALSE, 6);
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
   gtk_widget_show (vbox);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 12);
 
@@ -202,7 +197,7 @@ gtkparasite_window_create (void)
   gtk_window_set_title (GTK_WINDOW (window->window), title);
   g_free (title);
 
-  vpaned = gtk_vpaned_new ();
+  vpaned = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
   gtk_widget_show (vpaned);
   gtk_container_add (GTK_CONTAINER (window->window), vpaned);
 

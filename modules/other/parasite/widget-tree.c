@@ -115,7 +115,7 @@ on_toggle_realize (GtkCellRendererToggle *toggle,
                  WIDGET_REALIZED, gtk_widget_realize, gtk_widget_unrealize);
 }
 
-
+#if 0
 static void
 on_toggle_visible (GtkCellRendererToggle *toggle,
                    gchar                 *path_str,
@@ -138,7 +138,7 @@ on_toggle_map (GtkCellRendererToggle *toggle,
                  PARASITE_WIDGET_TREE (treeview),
                  WIDGET_MAPPED, gtk_widget_map, gtk_widget_unmap);
 }
-
+#endif
 
 static void
 parasite_widget_tree_init (ParasiteWidgetTree      *widget_tree,
@@ -339,7 +339,6 @@ append_widget (GtkTreeStore *model,
   const gchar *class_name = G_OBJECT_CLASS_NAME (GTK_WIDGET_GET_CLASS (widget));
   const gchar *name;
   const gchar *row_color;
-  GdkWindow *window;
   gchar *window_info;
   gchar *address;
   gboolean realized;
@@ -359,19 +358,20 @@ append_widget (GtkTreeStore *model,
         name = "";
     }
 
-  window = gtk_widget_get_window (widget);
+#if 0
   if (window_info)
     {
+      GdkWindow *window;
 #if HAVE_X11
+      window = gtk_widget_get_window (widget);
       window_info = g_strdup_printf ("%p (XID 0x%x)", window, (gint) GDK_WINDOW_XID (window));
 #else
       window_info = g_strdup ("");
 #endif
     }
   else
-    {
-      window_info = g_strdup ("");
-    }
+#endif
+    window_info = g_strdup ("");
 
   address = g_strdup_printf ("%p", widget);
 
@@ -404,7 +404,7 @@ append_widget (GtkTreeStore *model,
       children = gtk_container_get_children (GTK_CONTAINER (widget));
       for (l = children; l != NULL; l = l->next)
         append_widget (model, GTK_WIDGET (l->data), &iter);
-      g_free (children);
+      g_list_free (children);
     }
 }
 
