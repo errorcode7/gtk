@@ -241,7 +241,7 @@ parasite_widget_tree_init (ParasiteWidgetTree      *widget_tree,
   gtk_tree_view_append_column (GTK_TREE_VIEW (widget_tree), column);
   gtk_tree_view_column_set_resizable (column, TRUE);
 
-  /* Poinder Address column */
+  /* Address column */
   renderer = gtk_cell_renderer_text_new ();
   g_object_set (G_OBJECT (renderer),
                 "scale", TREE_TEXT_SCALE,
