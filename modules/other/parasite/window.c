@@ -183,7 +183,8 @@ gtkparasite_window_create (void)
   ParasiteWindow *window;
   GtkWidget *vpaned;
   GtkWidget *notebook;
-  char *title;
+  gchar *title;
+  GtkWindowGroup *group;
 
   window = g_new0 (ParasiteWindow, 1);
 
@@ -196,6 +197,9 @@ gtkparasite_window_create (void)
   title = g_strdup_printf ("Parasite - %s", g_get_application_name ());
   gtk_window_set_title (GTK_WINDOW (window->window), title);
   g_free (title);
+
+  group = gtk_window_group_new ();
+  gtk_window_group_add_window (group, window->window);
 
   vpaned = gtk_paned_new (GTK_ORIENTATION_VERTICAL);
   gtk_widget_show (vpaned);
