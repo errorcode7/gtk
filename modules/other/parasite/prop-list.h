@@ -37,36 +37,31 @@
 
 typedef struct _ParasitePropListPrivate ParasitePropListPrivate;
 
-typedef struct _ParasitePropList {
-   GtkTreeView parent;
+typedef struct _ParasitePropList
+{
+  GtkTreeView parent;
 
-   // Private
-   ParasitePropListPrivate *priv;
+  /* Private */
+  ParasitePropListPrivate *priv;
 } ParasitePropList;
 
-typedef struct _ParasitePropListClass {
-   GtkTreeViewClass parent;
+typedef struct _ParasitePropListClass
+{
+  GtkTreeViewClass parent;
 
-   // Padding for future expansion
-   void (*reserved0)(void);
-   void (*reserved1)(void);
-   void (*reserved2)(void);
-   void (*reserved3)(void);
 } ParasitePropListClass;
 
 
 G_BEGIN_DECLS
 
-
-GType parasite_proplist_get_type();
-GtkWidget *parasite_proplist_new();
-void parasite_proplist_set_widget(ParasitePropList* proplist,
-                                  GtkWidget *widget);
+GType      parasite_proplist_get_type   (void);
+GtkWidget *parasite_proplist_new        (void);
+void       parasite_proplist_set_widget (ParasitePropList *proplist,
+				                         GtkWidget        *widget);
 
 
 G_END_DECLS
 
+#endif  /* _GTKPARASITE_PROPLIST_H_ */
 
-#endif // _GTKPARASITE_PROPLIST_H_
-
-// vim: set et sw=4 ts=4:
+/* vim: set et sw=2 ts=2: */

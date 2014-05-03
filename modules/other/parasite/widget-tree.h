@@ -37,37 +37,37 @@
 
 typedef struct _ParasiteWidgetTreePrivate ParasiteWidgetTreePrivate;
 
-typedef struct _ParasiteWidgetTree {
-   GtkTreeView parent;
+typedef struct _ParasiteWidgetTree
+{
+  GtkTreeView parent;
 
-   // Private
-   ParasiteWidgetTreePrivate *priv;
+  /* Private */
+  ParasiteWidgetTreePrivate *priv;
 } ParasiteWidgetTree;
 
-typedef struct _ParasiteWidgetTreeClass {
-   GtkTreeViewClass parent;
+typedef struct _ParasiteWidgetTreeClass
+{
+  GtkTreeViewClass parent;
 
-    void (*widget_changed)(ParasiteWidgetTree *tree);
+  void (*widget_changed) (ParasiteWidgetTree * tree);
 } ParasiteWidgetTreeClass;
 
 
 G_BEGIN_DECLS
 
-
-GType parasite_widget_tree_get_type();
-GtkWidget *parasite_widget_tree_new();
-GtkWidget *parasite_widget_tree_get_selected_widget(ParasiteWidgetTree *widget_tree);
-void parasite_widget_tree_scan(ParasiteWidgetTree *widget_tree,
-                               GtkWidget *window);
-void parasite_widget_tree_select_widget(ParasiteWidgetTree *widget_tree,
-                                        GtkWidget *widget);
-void parasite_widget_tree_set_edit_mode(ParasiteWidgetTree *widget_tree,
-                                        gboolean edit);
+GType      parasite_widget_tree_get_type ();
+GtkWidget *parasite_widget_tree_new ();
+GtkWidget *parasite_widget_tree_get_selected_widget (ParasiteWidgetTree *widget_tree);
+void       parasite_widget_tree_scan                (ParasiteWidgetTree *widget_tree,
+                                                     GtkWidget          *window);
+void       parasite_widget_tree_select_widget       (ParasiteWidgetTree *widget_tree,
+                                                     GtkWidget          *widget);
+void       parasite_widget_tree_set_edit_mode       (ParasiteWidgetTree *widget_tree,
+                                                     gboolean            edit);
 
 
 G_END_DECLS
 
+#endif  /* _GTKPARASITE_WIDGETTREE_H_ */
 
-#endif // _GTKPARASITE_WIDGETTREE_H_
-
-// vim: set et sw=4 ts=4:
+/* vim: set et sw=2 ts=2: */

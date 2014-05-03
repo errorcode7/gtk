@@ -33,35 +33,35 @@
 
 typedef struct
 {
-    GtkWidget *window;
-    GtkWidget *widget_tree;
-    GtkWidget *prop_list;
-    GtkWidget *action_list;
-    GtkWidget *python_shell;
+  GtkWidget *window;
+  GtkWidget *widget_tree;
+  GtkWidget *prop_list;
+  GtkWidget *action_list;
+  GtkWidget *python_shell;
 
-    GtkWidget *grab_window;
-    GtkWidget *highlight_window;
+  GtkWidget *grab_window;
+  GtkWidget *highlight_window;
 
-    GtkWidget *widget_popup;
-    GtkWidget *action_popup;
+  GtkWidget *widget_popup;
+  GtkWidget *action_popup;
 
-    GdkWindow *selected_window;
+  GdkWindow *selected_window;
 
-    gboolean edit_mode_enabled;
+  gboolean edit_mode_enabled;
 
-    int flash_count;
-    int flash_cnx;
+  int flash_count;
+  int flash_cnx;
 
 } ParasiteWindow;
 
 
-void gtkparasite_window_create();
+void gtkparasite_window_create (void);
 
-void gtkparasite_flash_widget(ParasiteWindow *parasite, GtkWidget *widget);
+void gtkparasite_flash_widget (ParasiteWindow * parasite, GtkWidget * widget);
 
-GtkWidget *gtkparasite_inspect_button_new(ParasiteWindow *parasite);
+GtkWidget *gtkparasite_inspect_button_new (ParasiteWindow * parasite);
 
 
-#endif // _GTKPARASITE_H_
+#endif  /* _GTKPARASITE_H_ */
 
-// vim: set et sw=4 ts=4:
+/* vim: set et sw=2 ts=2: */

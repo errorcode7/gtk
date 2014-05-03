@@ -37,30 +37,28 @@
 
 typedef struct _ParasiteActionListPrivate ParasiteActionListPrivate;
 
-typedef struct _ParasiteActionList {
-    GtkTreeView parent;
+typedef struct _ParasiteActionList
+{
+  GtkTreeView parent;
 
-    // Private
-    ParasiteActionListPrivate *priv;
+  /* Private */
+  ParasiteActionListPrivate *priv;
 } ParasiteActionList;
 
-typedef struct _ParasiteActionListClass {
-    GtkTreeViewClass parent;
+typedef struct _ParasiteActionListClass
+{
+  GtkTreeViewClass parent;
 } ParasiteActionListClass;
 
 
 G_BEGIN_DECLS
 
-
-GType parasite_actionlist_get_type();
-GtkWidget *parasite_actionlist_new();
-gpointer parasite_actionlist_get_selected_object(ParasiteActionList *actionlist);
-
+GType      parasite_actionlist_get_type            (void);
+GtkWidget *parasite_actionlist_new                 (void);
+gpointer   parasite_actionlist_get_selected_object (ParasiteActionList *actionlist);
 
 G_END_DECLS
 
+#endif  /* _GTKPARASITE_ACTIONLIST_H_ */
 
-#endif // _GTKPARASITE_ACTIONLIST_H_
-
-// vim: set et sw=4 ts=4:
-
+/* vim: set et sw=2 ts=2: */

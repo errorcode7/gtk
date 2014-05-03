@@ -27,12 +27,11 @@
 
 
 int
-gtk_module_init(gint argc, char *argv[])
+gtk_module_init (gint argc, char *argv[])
 {
-    gtkparasite_window_create();
-    return FALSE;
+  gtkparasite_window_create ();
 
-    return 0;
+  return 0;
 }
 
-// vim: set et sw=4 ts=4:
+/* vim: set et sw=2 ts=2: */
