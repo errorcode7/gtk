@@ -482,6 +482,7 @@ gtk_private_h_sources =		\
 	gtkcssstringvalueprivate.h	\
 	gtkcssstylefuncsprivate.h \
 	gtkcssstylepropertyprivate.h \
+	gtkcsstransformvalueprivate.h	\
 	gtkcsstransitionprivate.h	\
 	gtkcsstypedvalueprivate.h	\
 	gtkcssvalueprivate.h	\
@@ -731,6 +732,7 @@ gtk_base_c_sources = 		\
 	gtkcssstylefuncs.c	\
 	gtkcssstyleproperty.c	\
 	gtkcssstylepropertyimpl.c \
+	gtkcsstransformvalue.c	\
 	gtkcsstransition.c	\
 	gtkcsstypedvalue.c	\
 	gtkcssvalue.c		\
