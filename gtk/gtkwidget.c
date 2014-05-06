@@ -7199,6 +7199,7 @@ _gtk_widget_run_controllers (GtkWidget           *widget,
   GList *l;
 
   priv = widget->priv;
+  g_object_ref (widget);
 
   for (l = priv->event_controllers; l; l = l->next)
     {
@@ -7207,6 +7208,8 @@ _gtk_widget_run_controllers (GtkWidget           *widget,
       if (phase == gtk_event_controller_get_propagation_phase (data->controller))
         handled |= gtk_event_controller_handle_event (data->controller, event);
     }
+
+  g_object_unref (widget);
 
   return handled;
 }
