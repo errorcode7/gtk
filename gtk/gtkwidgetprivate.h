@@ -149,6 +149,12 @@ void              _gtk_widget_style_context_invalidated    (GtkWidget    *widget
 void              _gtk_widget_update_parent_muxer          (GtkWidget    *widget);
 GtkActionMuxer *  _gtk_widget_get_action_muxer             (GtkWidget    *widget);
 
+void              _gtk_widget_add_controller               (GtkWidget           *widget,
+                                                            GtkEventController  *controller,
+                                                            GtkPropagationPhase  phase);
+void              _gtk_widget_remove_controller            (GtkWidget           *widget,
+                                                            GtkEventController  *controller);
+
 G_END_DECLS
 
 #endif /* __GTK_WIDGET_PRIVATE_H__ */
