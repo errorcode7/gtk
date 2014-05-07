@@ -12442,10 +12442,10 @@ g_print ("toggle debugging\n");
 
   if (type == G_TYPE_NONE)
     {
-      _gtk_modules_load_module ("gtkparasite");
-      type = g_type_from_name ("ParasiteWindow");
+      _gtk_modules_load_module ("gtkinspector");
+      type = g_type_from_name ("GtkInspectorWindow");
       if (type == G_TYPE_INVALID)
-        g_warning ("Failed to load gtkparasite module, debugging not available.");
+        g_warning ("Failed to load gtkinspector module, debugging not available.");
     }
 
   if (!g_type_is_a (type, GTK_TYPE_WINDOW))
